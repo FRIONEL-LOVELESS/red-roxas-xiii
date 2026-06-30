@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>THE ABYSS TERMINAL // V3.2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon-purple: #9d00ff; --neon-green: #00ff88; --bg-dark: #020005; }
+        body { background-color: var(--bg-dark); color: #d4d4dc; font-family: 'Rajdhani', sans-serif; margin: 0; padding: 40px; }
+        .container { max-width: 850px; margin: auto; background: rgba(10, 5, 25, 0.75); border: 2px solid var(--neon-purple); border-radius: 8px; padding: 40px; box-shadow: 0 0 20px var(--neon-purple); }
+        h1 { color: #fff; text-align: center; text-transform: uppercase; border-bottom: 2px dashed var(--neon-green); padding-bottom: 15px; }
+        .comic-panel { border: 2px solid var(--neon-purple); border-radius: 8px; padding: 25px; margin-bottom: 30px; background: rgba(10, 0, 20, 0.4); }
+        input { background: #000; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        #output, #cli-output { color: var(--neon-green); font-family: monospace; white-space: pre-wrap; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>THE ABYSS TERMINAL</h1>
+    <div class="comic-panel">
+        <input type="password" id="vault-key" placeholder="> ENTER MASTER_SCROLL...">
+        <input type="file" id="file-browser" style="display:none" onchange="handleFile(this.files)">
+        <input type="text" id="cli-input" placeholder="> COMMAND_PROMPT..." onkeydown="if(event.key==='Enter') executeCLI(this.value)">
+        <div id="cli-output">> AWAITING COMMANDS...</div>
+        <div id="output">> [VIGILANCE]: READY.</div>
+    </div>
+</div>
+
+<script>
+    window.onload = () => document.getElementById('output').innerText = "> [VIGILANCE]: SYSTEM VERIFIED // STATUS: OKAY.";
+
+    async function executeCLI(cmd) {
+        const output = document.getElementById('cli-output');
+        const parts = cmd.split(' ');
+        const token = document.getElementById('vault-key').value;
+        
+        switch(parts[0].toUpperCase()) {
+            case 'PING':
+                output.innerText = "> [SYSTEM]: PINGING REPOSITORY...";
+                const check = await fetch('https://api.github.com/repos/FRIONEL-LOVELESS/red-roxas-xiii', {
+                    headers: { 'Authorization': 'token ' + token }
+                });
+                output.innerText = check.ok ? "> [SYSTEM]: CONNECTION VERIFIED // ACCESS GRANTED." : "> [SYSTEM]: CONNECTION REJECTED // CHECK TOKEN SCOPE.";
+                break;
+            case 'FETCH':
+                output.innerText = "> [SYSTEM]: DOWNLOADING README.md...";
+                const res = await fetch('https://api.github.com/repos/FRIONEL-LOVELESS/red-roxas-xiii/contents/README.md', {
+                    headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3.raw' }
+                });
+                const text = await res.text();
+                output.innerText = "> [README_CONTENT]:\n" + text;
+                break;
+            case 'IMPORT': 
+                document.getElementById('file-browser').click();
+                output.innerText = "> [ABYSS_ADDER]: SELECT_FILE_TARGET...";
+                break;
+            case 'HYPER': 
+                output.innerText = "> [HYPERTUNNEL]: ENGAGING...";
+                await linkToGitHub('README.md', "THE ABYSS TERMINAL // HYPERTUNNEL\n\n- Chrono Trigger I: Identity Protocol (V3)\n- Chrono Trigger II: Hypertunnel Uplink\n- Chrono Trigger III: The Abyss Adder");
+                break;
+            case 'FORCE_HYPER':
+                output.innerText = "> [SYSTEM]: FORCING HYPERTUNNEL...";
+                const forceContent = "THE ABYSS TERMINAL // HYPERTUNNEL\n\n- Chrono Trigger I: Identity Protocol (V3)\n- Chrono Trigger II: Hypertunnel Uplink\n- Chrono Trigger III: The Abyss Adder";
+                await linkToGitHub('README.md', forceContent);
+                break;
+            default: output.innerText = "> [ERROR]: COMMAND NOT RECOGNIZED.";
+        }
+    }
+
+    function handleFile(files) {
+        const reader = new FileReader();
+        reader.onload = (e) => linkToGitHub(files[0].name, e.target.result);
+        reader.readAsText(files[0]);
+    }
+
+    async function linkToGitHub(repoPath, content) {
+        const token = document.getElementById('vault-key').value;
+        const url = `https://api.github.com/repos/FRIONEL-LOVELESS/red-roxas-xiii/contents/${repoPath}`;
+        try {
+            const getRes = await fetch(url, { headers: { 'Authorization': 'token ' + token }});
+            const fileData = await getRes.json();
+            const payload = { message: "Hypertunnel Update", content: btoa(content), branch: "main" };
+            if (fileData.sha) payload.sha = fileData.sha;
+            await fetch(url, { method: 'PUT', headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            document.getElementById('cli-output').innerText = "> [ABYSS_ADDER]: SUCCESS // PATH: " + repoPath;
+        } catch (err) {
+            document.getElementById('cli-output').innerText = "> [ABYSS_ADDER]: FAILED // CHECK TOKEN/PERMISSIONS.";
+        }
+    }
+</script>
+</body>
+</html>
