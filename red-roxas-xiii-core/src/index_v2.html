@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <title>RED-ROXAS-XIII :: CORE_TERMINAL</title>
+    <style>
+        body { background: #0d1117; color: #38bdf8; font-family: 'Courier New', monospace; padding: 20px; }
+        .terminal-interface { border: 1px solid #334155; padding: 20px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+<div class='terminal-interface'>
+    <div id='bridge-log'>[INITIALIZING_BRIDGE...]</div>
+    <div id='telemetry-log'>[INITIALIZING_TELEMETRY...]</div>
+</div>
+<script>
+    async function fetchRepoData() {
+        const repoOwner = 'Firion-El';
+        const repoName = 'red-roxas-xiii';
+        const displayElement = document.getElementById('bridge-log');
+        try {
+            const response = await fetch(\https://api.github.com/repos/\/\/commits?per_page=1\);
+            const data = await response.json();
+            displayElement.innerHTML = \[SYNCED]: \ | \\;
+        } catch (e) { displayElement.innerHTML = "[ERROR]: SYNC_FAILED"; }
+    }
+    function updateMissionTelemetry() {
+        const targets = [
+            { name: 'JAPAN_2026', date: '2026-09-18T00:00:00' },
+            { name: 'S_KOREA_TARGET', date: '2027-01-01T00:00:00' },
+            { name: 'SINGAPORE_TARGET', date: '2027-06-01T00:00:00' }
+        ];
+        const displayElement = document.getElementById('telemetry-log');
+        setInterval(() => {
+            let output = "";
+            const now = new Date();
+            targets.forEach(t => {
+                const d = Math.floor((new Date(t.date) - now) / 1000);
+                output += \[\]: DRIFT :: \D:\H:\M:\S<br>\;
+            });
+            displayElement.innerHTML = output;
+        }, 1000);
+    }
+    fetchRepoData();
+    updateMissionTelemetry();
+</script>
+</body>
+</html>
